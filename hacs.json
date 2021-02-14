@@ -1,6 +1,6 @@
 {
     "name": "Airscape Whole House Fan",
-    "render_readme": false,
+    "render_readme": true,
     "domains": ["airscape"],
     "country": "US",
     "homeassistant": "0.100.0",
