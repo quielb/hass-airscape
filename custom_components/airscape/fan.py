@@ -19,6 +19,8 @@ from homeassistant.const import (
     CONF_MINIMUM
 )
 
+from .const import fan_to_hass_attr
+
 DEFAULT_TIMEOUT = 5
 DEFAULT_MINIMUM = 1
 
@@ -91,6 +93,7 @@ class AirscapeWHF(FanEntity):
         self._available = True
         self._minimum_speed = minimum
         self._speed_list = [f"{i}" for i in range(0, 11)]
+        self._attr = {}
 
     @property
     def name(self):
@@ -111,6 +114,10 @@ class AirscapeWHF(FanEntity):
     def supported_features(self):
         """Return supported features of fan."""
         return SUPPORT_SET_SPEED
+
+    @property
+    def device_state_attributes(self):
+        return self._attr
 
     @property
     def is_on(self):
@@ -199,3 +206,6 @@ class AirscapeWHF(FanEntity):
             self._state = bool(fan_data["fanspd"])
             self._speed = str(fan_data["fanspd"])
             self._available = True
+            #self._attr = fan_data
+            for k,v in fan_to_hass_attr.items():
+                self._attr[v] = fan_data[k]
