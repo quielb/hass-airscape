@@ -2,8 +2,9 @@
     "domain": "airscape",
     "name": "Airscape Whole House Fan",
     "documentation": "https://www.home-assistant.io/components/fan.airscape",
+    "version": "0.1.1",
     "requirements": [
-        "airscape==0.1.8"
+        "airscape==0.1.8.1"
     ],
     "dependencies": [],
     "codeowners": [

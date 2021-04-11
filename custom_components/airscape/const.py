@@ -4,7 +4,8 @@ fan_to_hass_attr = {
     "power": "Power",
     "inside": "Inside Temperature",
     "attic": "Attic Temperature",
-    "oa": "Ouside Temperature",
+    "oa": "Outside Temperature",
     "interlock1": "InterLock1",
     "interlock2": "InterLock2",
+    "timeremaining": "Shutoff Timer"
 }
