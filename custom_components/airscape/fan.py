@@ -19,6 +19,7 @@ from homeassistant.const import (
     CONF_MINIMUM
 )
 
+from . import AIRSCAPE_DOMAIN
 from .const import fan_to_hass_attr
 
 DEFAULT_TIMEOUT = 5
@@ -75,8 +76,17 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
         entity = hass.data[DOMAIN].get_entity(entity_id)
         entity.slow_down()
 
-    hass.services.register(DOMAIN, "airscape_speed_up", service_speed_up)
-    hass.services.register(DOMAIN, "airscape_slow_down", service_slow_down)
+    def service_add_time(call):
+        """Handle slow_down service call."""
+        entity_id = call.data.get("entity_id")
+        _LOGGER.debug("Calling add_time for %s", entity_id)
+
+        entity = hass.data[DOMAIN].get_entity(entity_id)
+        entity.add_time()
+
+    hass.services.register(AIRSCAPE_DOMAIN, "speed_up", service_speed_up)
+    hass.services.register(AIRSCAPE_DOMAIN, "slow_down", service_slow_down)
+    hass.services.register(AIRSCAPE_DOMAIN, "add_time", service_add_time)
 
     return True
 
@@ -156,7 +166,7 @@ class AirscapeWHF(FanEntity):
             airscape.exceptions.Timeout
         ):
             self._available = False
-
+    
     def slow_down(self):
         """Instruct fan to increment speed down by 1."""
         try:
@@ -167,6 +177,17 @@ class AirscapeWHF(FanEntity):
             airscape.exceptions.Timeout
         ):
             self._available = False
+    
+    def add_time(self):
+        """Add an hour to the shutoff timer."""
+        try:
+            self._fan.add_time()
+        except (
+            airscape.exceptions.ConnectionError,
+            airscape.exceptions.Timeout
+        ):
+            self._available = False
+
 
     @property
     def speed_list(self):
