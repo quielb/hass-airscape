@@ -56,6 +56,22 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
         # Add devices
         add_entities([AirscapeWHF(device, name, minimum)], True)
 
+    def service_speed_up(call):
+        """Handle speed_up service call."""
+        entity_id = call.data.get("entity_id")
+        _LOGGER.debug("Calling speed_up for %s", entity_id)
+
+        entity = hass.data[DOMAIN].get_entity(entity_id)
+        entity.speed_up()
+
+    def service_slow_down(call):
+        """Handle slow_down service call."""
+        entity_id = call.data.get("entity_id")
+        _LOGGER.debug("Calling slow_down for %s", entity_id)
+
+        entity = hass.data[DOMAIN].get_entity(entity_id)
+        entity.slow_down()
+
     def service_add_time(call):
         """Handle slow_down service call."""
         entity_id = call.data.get("entity_id")
@@ -64,6 +80,8 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
         entity = hass.data[DOMAIN].get_entity(entity_id)
         entity.add_time()
 
+    hass.services.register(AIRSCAPE_DOMAIN, "speed_up", service_speed_up)
+    hass.services.register(AIRSCAPE_DOMAIN, "slow_down", service_slow_down)
     hass.services.register(AIRSCAPE_DOMAIN, "add_time", service_add_time)
 
     return True
@@ -122,7 +140,9 @@ class AirscapeWHF(FanEntity):
         try:
             if percentage is not None:
                 self._fan.speed = math.ceil(
-                    percentage_to_ranged_value((1, self._fan.max_speed), percentage)
+                    percentage_to_ranged_value(
+                        (self._minimum_speed, self._fan.max_speed), percentage
+                    )
                 )
             else:
                 self._fan.speed = self._minimum_speed
@@ -146,12 +166,14 @@ class AirscapeWHF(FanEntity):
     @property
     def speed_count(self):
         """Return the number of speeds the fan supports."""
-        return int_states_in_range((1, self._fan.max_speed))
+        return int_states_in_range((self._minimum_speed, self._fan.max_speed))
 
     @property
     def percentage(self):
         """Return the current speed percentage"""
-        return ranged_value_to_percentage((1, self._fan.max_speed), self._speed)
+        return ranged_value_to_percentage(
+            (self._minimum_speed, self._fan.max_speed), self._speed
+        )
 
     def set_percentage(self, percentage: int):
         """Set the speed of the fan."""
@@ -159,8 +181,25 @@ class AirscapeWHF(FanEntity):
             self._fan.is_on = False
         try:
             self._fan.speed = math.ceil(
-                percentage_to_ranged_value((1, self._fan.max_speed), percentage)
+                percentage_to_ranged_value(
+                    (self._minimum_speed, self._fan.max_speed), percentage
+                )
             )
+        except (airscape.exceptions.ConnectionError, airscape.exceptions.Timeout):
+            self._available = False
+
+    def speed_up(self):
+        """Instruct fan to increment speed up by 1."""
+        try:
+            self._fan.speed_up()
+        except (airscape.exceptions.ConnectionError, airscape.exceptions.Timeout):
+            self._available = False
+
+    def slow_down(self):
+        """Instruct fan to increment speed down by 1."""
+        try:
+            if self._speed > self._minimum_speed:
+                self._fan.slow_down()
         except (airscape.exceptions.ConnectionError, airscape.exceptions.Timeout):
             self._available = False
 
