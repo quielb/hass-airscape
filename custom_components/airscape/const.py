@@ -1,3 +1,5 @@
+DEFAULT_TIMEOUT = 5
+DEFAULT_MINIMUM = 1
 fan_to_hass_attr = {
     "doorinprocess": "Door Moving",
     "cfm": "CFM",
@@ -7,5 +9,5 @@ fan_to_hass_attr = {
     "oa": "Outside Temperature",
     "interlock1": "InterLock1",
     "interlock2": "InterLock2",
-    "timeremaining": "Shutoff Timer"
+    "timeremaining": "Shutoff Timer",
 }

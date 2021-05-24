@@ -1,5 +1,5 @@
 """Platform for Airscape fan integration."""
-import logging
+import logging, math
 import airscape
 import voluptuous as vol
 
@@ -12,18 +12,18 @@ from homeassistant.components.fan import (
     FanEntity,
     DOMAIN,
 )
-from homeassistant.const import (
-    CONF_HOST,
-    CONF_NAME,
-    CONF_TIMEOUT,
-    CONF_MINIMUM
+
+from homeassistant.const import CONF_HOST, CONF_NAME, CONF_TIMEOUT, CONF_MINIMUM
+
+from homeassistant.util.percentage import (
+    int_states_in_range,
+    ranged_value_to_percentage,
+    percentage_to_ranged_value,
 )
 
 from . import AIRSCAPE_DOMAIN
-from .const import fan_to_hass_attr
+from .const import fan_to_hass_attr, DEFAULT_TIMEOUT, DEFAULT_MINIMUM
 
-DEFAULT_TIMEOUT = 5
-DEFAULT_MINIMUM = 1
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,33 +48,13 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 
     try:
         device = airscape.Fan(host, timeout)
-    except (
-        airscape.exceptions.Timeout,
-        airscape.exceptions.ConnectionError
-    ):
+    except (airscape.exceptions.Timeout, airscape.exceptions.ConnectionError):
         _LOGGER.error(
-            "Cannot connect to %s.  "
-            "Device did not respond to API request", host
+            "Cannot connect to %s.  " "Device did not respond to API request", host
         )
     else:
         # Add devices
         add_entities([AirscapeWHF(device, name, minimum)], True)
-
-    def service_speed_up(call):
-        """Handle speed_up service call."""
-        entity_id = call.data.get("entity_id")
-        _LOGGER.debug("Calling speed_up for %s", entity_id)
-
-        entity = hass.data[DOMAIN].get_entity(entity_id)
-        entity.speed_up()
-
-    def service_slow_down(call):
-        """Handle slow_down service call."""
-        entity_id = call.data.get("entity_id")
-        _LOGGER.debug("Calling slow_down for %s", entity_id)
-
-        entity = hass.data[DOMAIN].get_entity(entity_id)
-        entity.slow_down()
 
     def service_add_time(call):
         """Handle slow_down service call."""
@@ -84,8 +64,6 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
         entity = hass.data[DOMAIN].get_entity(entity_id)
         entity.add_time()
 
-    hass.services.register(AIRSCAPE_DOMAIN, "speed_up", service_speed_up)
-    hass.services.register(AIRSCAPE_DOMAIN, "slow_down", service_slow_down)
     hass.services.register(AIRSCAPE_DOMAIN, "add_time", service_add_time)
 
     return True
@@ -102,7 +80,6 @@ class AirscapeWHF(FanEntity):
         self._speed = None
         self._available = True
         self._minimum_speed = minimum
-        self._speed_list = [f"{i}" for i in range(0, 11)]
         self._attr = {}
 
     @property
@@ -134,81 +111,57 @@ class AirscapeWHF(FanEntity):
         """Return state of fan."""
         return self._state
 
-    def turn_on(self, speed: str = None, **kwargs):
+    def turn_on(
+        self,
+        speed: str = None,
+        percentage: int = None,
+        preset_mode: str = None,
+        **kwargs,
+    ) -> None:
         """Instruct the fan to turn on."""
         try:
-            if speed is not None:
-                self._fan.speed = int(speed)
+            if percentage is not None:
+                self._fan.speed = math.ceil(
+                    percentage_to_ranged_value((1, self._fan.max_speed), percentage)
+                )
             else:
-                self._fan.speed = int(self._minimum_speed)
-        except (
-            airscape.exceptions.ConnectionError,
-            airscape.exceptions.Timeout
-        ):
+                self._fan.speed = self._minimum_speed
+        except (airscape.exceptions.ConnectionError, airscape.exceptions.Timeout):
             self._available = False
 
     def turn_off(self, **kwargs):
         """Instruct the fan to turn off."""
         try:
             self._fan.is_on = False
-        except (
-            airscape.exceptions.ConnectionError,
-            airscape.exceptions.Timeout
-        ):
+        except (airscape.exceptions.ConnectionError, airscape.exceptions.Timeout):
             self._available = False
 
-    def speed_up(self):
-        """Instruct fan to increment speed up by 1."""
-        try:
-            self._fan.speed_up()
-        except (
-            airscape.exceptions.ConnectionError,
-            airscape.exceptions.Timeout
-        ):
-            self._available = False
-    
-    def slow_down(self):
-        """Instruct fan to increment speed down by 1."""
-        try:
-            if int(self._speed) - 1 >= self._minimum_speed:
-                self._fan.slow_down()
-        except (
-            airscape.exceptions.ConnectionError,
-            airscape.exceptions.Timeout
-        ):
-            self._available = False
-    
     def add_time(self):
         """Add an hour to the shutoff timer."""
         try:
             self._fan.add_time()
-        except (
-            airscape.exceptions.ConnectionError,
-            airscape.exceptions.Timeout
-        ):
+        except (airscape.exceptions.ConnectionError, airscape.exceptions.Timeout):
             self._available = False
 
+    @property
+    def speed_count(self):
+        """Return the number of speeds the fan supports."""
+        return int_states_in_range((1, self._fan.max_speed))
 
     @property
-    def speed_list(self):
-        """Return list of available speeds."""
-        return self._speed_list
+    def percentage(self):
+        """Return the current speed percentage"""
+        return ranged_value_to_percentage((1, self._fan.max_speed), self._speed)
 
-    @property
-    def speed(self):
-        """Return the speed of the fan."""
-        return self._speed
-
-    def set_speed(self, speed):
+    def set_percentage(self, percentage: int):
         """Set the speed of the fan."""
-        if not bool(int(speed)):
+        if not bool(percentage):
             self._fan.is_on = False
         try:
-            self._fan.speed = int(speed)
-        except (
-            airscape.exceptions.ConnectionError,
-            airscape.exceptions.Timeout
-        ):
+            self._fan.speed = math.ceil(
+                percentage_to_ranged_value((1, self._fan.max_speed), percentage)
+            )
+        except (airscape.exceptions.ConnectionError, airscape.exceptions.Timeout):
             self._available = False
 
     def update(self):
@@ -218,15 +171,12 @@ class AirscapeWHF(FanEntity):
         """
         try:
             fan_data = self._fan.get_device_state()
-        except (
-            airscape.exceptions.ConnectionError,
-            airscape.exceptions.Timeout
-        ):
+        except (airscape.exceptions.ConnectionError, airscape.exceptions.Timeout):
             self._available = False
         else:
             self._state = bool(fan_data["fanspd"])
-            self._speed = str(fan_data["fanspd"])
+            self._speed = fan_data["fanspd"]
             self._available = True
-            #self._attr = fan_data
-            for k,v in fan_to_hass_attr.items():
+            # self._attr = fan_data
+            for k, v in fan_to_hass_attr.items():
                 self._attr[v] = fan_data[k]
