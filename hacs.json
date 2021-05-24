@@ -1,8 +1,8 @@
 {
     "name": "Airscape Whole House Fan",
-    "render_readme": true,
+    "render_readme": false,
     "domains": ["airscape"],
     "country": "US",
-    "homeassistant": "0.100.0",
+    "homeassistant": "2021.3.0",
     "iot_class": "local_pull"
 }
