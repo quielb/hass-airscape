@@ -13,7 +13,12 @@ A Home Assistant custom component to control Airscape Whole House Fans with Gen2
 
 ### Changes
 
-{% if version_installed.replace("v", "").replace(".","") | int < 190  %}
+{% if version_installed.replace("v", "").replace(".","") | int < 193  %}
+
+- Reverted the removal of custom services slow_down and speed_up. The built in service fan.decrease_speed allows the fan to be turned off
+  if decreased_speed is at the minimum speed.
+  {% endif %}
+  {% if version_installed.replace("v", "").replace(".","") | int < 190  %}
 
 - Added the ability to dynamically determine max speed based on model. Should allow for speed to be correctly represented in the Front End.
 - Updated Entity to utilized the new percentage speed model in HA.
@@ -43,10 +48,10 @@ fan:
 
 The minimum attribute is optional. It specifies the minimum starting speed and prevents the speed from going below that value.
 
-This component adds one custom service:
+This component adds three custom service:
 
 ```
+airscape.speed_up
+airscape.slow_down
 airscape.add_time
 ```
-
-This allows for adding an hour of time to the timer on the fan.
