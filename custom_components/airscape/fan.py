@@ -13,7 +13,8 @@ from homeassistant.components.fan import (
     DOMAIN,
 )
 
-from homeassistant.const import CONF_HOST, CONF_NAME, CONF_TIMEOUT, CONF_MINIMUM, CONF_MAXIMUM
+
+from homeassistant.const import CONF_HOST, CONF_NAME, CONF_TIMEOUT, CONF_MINIMUM, CONF_MAXIMUM, CONF_DEFAULT
 
 from homeassistant.util.percentage import (
     int_states_in_range,
@@ -35,6 +36,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): cv.positive_int,
         vol.Optional(CONF_MINIMUM, default=DEFAULT_MINIMUM): cv.positive_int,
         vol.Optional(CONF_MAXIMUM): cv.positive_int,
+        vol.Optional(CONF_DEFAULT, default=DEFAULT_MINIMUM): cv.positive_int,
     }
 )
 
@@ -45,7 +47,8 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     host = config.get(CONF_HOST)
     name = config.get(CONF_NAME)
     minimum = config.get(CONF_MINIMUM)    
-    maximum = config.get(CONF_MAXIMUM)
+    maximum = config.get(CONF_MAXIMUM)    
+    default = config.get(CONF_DEFAULT)
     timeout = config.get(CONF_TIMEOUT)
 
     try:
@@ -58,7 +61,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
         )
     else:
         # Add devices
-        add_entities([AirscapeWHF(device, name, minimum, maximum)], True)
+        add_entities([AirscapeWHF(device, name, minimum, maximum, default)], True)
 
     def service_speed_up(call):
         """Handle speed_up service call."""
@@ -94,7 +97,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 class AirscapeWHF(FanEntity):
     """Representation of an Airscape Fan."""
 
-    def __init__(self, device, name, minimum, maximum):
+    def __init__(self, device, name, minimum, maximum, default):
         """Initialize a AirscapeFan."""
         self._fan = device
         self._name = name
@@ -103,6 +106,8 @@ class AirscapeWHF(FanEntity):
         self._available = True
         self._minimum_speed = minimum
         self._maximum_speed = maximum
+        self._default_speed = default
+
         self._attr = {}
 
     @property
@@ -150,7 +155,7 @@ class AirscapeWHF(FanEntity):
                     )
                 )
             else:
-                self._fan.speed = self._minimum_speed
+                self._fan.speed = self._default_speed
         except (airscape.exceptions.ConnectionError, airscape.exceptions.Timeout):
             self._available = False
 
