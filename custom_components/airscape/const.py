@@ -1,5 +1,6 @@
 DEFAULT_TIMEOUT = 5
 DEFAULT_MINIMUM = 1
+DEFAULT_MAXIMUM = 10
 fan_to_hass_attr = {
     "doorinprocess": "Door Moving",
     "cfm": "CFM",
