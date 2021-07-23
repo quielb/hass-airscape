@@ -196,7 +196,7 @@ class AirscapeWHF(FanEntity):
     def speed_up(self):
         """Instruct fan to increment speed up by 1."""
         try:
-            if self._speed < self._maximum_speed
+            if self._speed < self._maximum_speed:
                 self._fan.speed_up()
         except (airscape.exceptions.ConnectionError, airscape.exceptions.Timeout):
             self._available = False
