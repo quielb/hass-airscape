@@ -13,7 +13,7 @@ from homeassistant.components.fan import (
     DOMAIN,
 )
 
-from homeassistant.const import CONF_HOST, CONF_NAME, CONF_TIMEOUT, CONF_MINIMUM
+from homeassistant.const import CONF_HOST, CONF_NAME, CONF_TIMEOUT, CONF_MINIMUM, CONF_MAXIMUM
 
 from homeassistant.util.percentage import (
     int_states_in_range,
@@ -34,6 +34,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_NAME): cv.string,
         vol.Optional(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): cv.positive_int,
         vol.Optional(CONF_MINIMUM, default=DEFAULT_MINIMUM): cv.positive_int,
+        vol.Optional(CONF_MAXIMUM): cv.positive_int,
     }
 )
 
@@ -43,18 +44,21 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     # Setup connection to the fan
     host = config.get(CONF_HOST)
     name = config.get(CONF_NAME)
-    minimum = config.get(CONF_MINIMUM)
+    minimum = config.get(CONF_MINIMUM)    
+    maximum = config.get(CONF_MAXIMUM)
     timeout = config.get(CONF_TIMEOUT)
 
     try:
         device = airscape.Fan(host, timeout)
+        # use maximum reported by the airscape library is none specifed in the config
+        maximum = maximum or device.max_speed
     except (airscape.exceptions.Timeout, airscape.exceptions.ConnectionError):
         _LOGGER.error(
             "Cannot connect to %s.  " "Device did not respond to API request", host
         )
     else:
         # Add devices
-        add_entities([AirscapeWHF(device, name, minimum)], True)
+        add_entities([AirscapeWHF(device, name, minimum, maximum)], True)
 
     def service_speed_up(call):
         """Handle speed_up service call."""
@@ -90,7 +94,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 class AirscapeWHF(FanEntity):
     """Representation of an Airscape Fan."""
 
-    def __init__(self, device, name, minimum):
+    def __init__(self, device, name, minimum, maximum):
         """Initialize a AirscapeFan."""
         self._fan = device
         self._name = name
@@ -98,6 +102,7 @@ class AirscapeWHF(FanEntity):
         self._speed = None
         self._available = True
         self._minimum_speed = minimum
+        self._maximum_speed = maximum
         self._attr = {}
 
     @property
@@ -141,7 +146,7 @@ class AirscapeWHF(FanEntity):
             if percentage is not None:
                 self._fan.speed = math.ceil(
                     percentage_to_ranged_value(
-                        (self._minimum_speed, self._fan.max_speed), percentage
+                        (self._minimum_speed, self._maximum_speed), percentage
                     )
                 )
             else:
@@ -166,13 +171,13 @@ class AirscapeWHF(FanEntity):
     @property
     def speed_count(self):
         """Return the number of speeds the fan supports."""
-        return int_states_in_range((self._minimum_speed, self._fan.max_speed))
+        return int_states_in_range((self._minimum_speed, self._maximum_speed))
 
     @property
     def percentage(self):
         """Return the current speed percentage"""
         return ranged_value_to_percentage(
-            (self._minimum_speed, self._fan.max_speed), self._speed
+            (self._minimum_speed, self._maximum_speed), self._speed
         )
 
     def set_percentage(self, percentage: int):
@@ -182,7 +187,7 @@ class AirscapeWHF(FanEntity):
         try:
             self._fan.speed = math.ceil(
                 percentage_to_ranged_value(
-                    (self._minimum_speed, self._fan.max_speed), percentage
+                    (self._minimum_speed, self._maximum_speed), percentage
                 )
             )
         except (airscape.exceptions.ConnectionError, airscape.exceptions.Timeout):
@@ -191,7 +196,8 @@ class AirscapeWHF(FanEntity):
     def speed_up(self):
         """Instruct fan to increment speed up by 1."""
         try:
-            self._fan.speed_up()
+            if self._speed < self._maximum_speed
+                self._fan.speed_up()
         except (airscape.exceptions.ConnectionError, airscape.exceptions.Timeout):
             self._available = False
 
