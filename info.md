@@ -18,7 +18,7 @@ A Home Assistant custom component to control Airscape Whole House Fans with Gen2
 
 ### Changes
 
-{% if version_installed.replace("v", "").replace(".","") | int < 193  %}
+{% if version_installed.replace("v", "").replace(".","") | int < 194  %}
 
 - Small update to fix additional attributes not showing up.
   {% endif %}
