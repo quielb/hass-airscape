@@ -6,6 +6,11 @@ A Home Assistant custom component to control Airscape Whole House Fans with Gen2
 
 ### Breaking Changes
 
+{% if version_installed.replace("v", "").replace(".","") | int < 194  %}
+
+- Fixed attribute names to be more consistent with HA standards. They are now all lowercase and no longer include spaces.
+  {% endif %}
+
 {% if version_installed.replace("v", "").replace(".","") | int < 190  %}
 
 - Removed speed_up and slow_down custom services now that new FanEntity has them built in.
@@ -15,24 +20,21 @@ A Home Assistant custom component to control Airscape Whole House Fans with Gen2
 
 {% if version_installed.replace("v", "").replace(".","") | int < 193  %}
 
+- Small update to fix additional attributes not showing up.
+  {% endif %}
+
+{% if version_installed.replace("v", "").replace(".","") | int < 193  %}
+
 - Reverted the removal of custom services slow_down and speed_up. The built in service fan.decrease_speed allows the fan to be turned off
   if decreased_speed is at the minimum speed.
   {% endif %}
-  {% if version_installed.replace("v", "").replace(".","") | int < 190  %}
+
+{% if version_installed.replace("v", "").replace(".","") | int < 190  %}
 
 - Added the ability to dynamically determine max speed based on model. Should allow for speed to be correctly represented in the Front End.
 - Updated Entity to utilized the new percentage speed model in HA.
   {% endif %}
   {% endif %}
-
-{% if not installed %}
-
-### Installation
-
-1. Click install.
-2. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "Blueprint".
-
-{% endif %}
 
 ### Usage
 
