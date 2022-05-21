@@ -121,13 +121,17 @@ class AirscapeWHF(FanEntity):
         return SUPPORT_SET_SPEED
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         return self._attr
 
     @property
     def is_on(self):
         """Return state of fan."""
         return self._state
+
+    @property
+    def preset_modes(self):
+        return None
 
     def turn_on(
         self,
