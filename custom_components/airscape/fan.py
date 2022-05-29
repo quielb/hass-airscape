@@ -1,4 +1,5 @@
 """Platform for Airscape fan integration."""
+from asyncio.log import logger
 import logging, math
 import airscape
 import voluptuous as vol
@@ -181,6 +182,7 @@ class AirscapeWHF(FanEntity):
 
     def set_percentage(self, percentage: int):
         """Set the speed of the fan."""
+        _LOGGER.debug("Setting fan to percentage: %s", percentage)
         if not bool(percentage):
             self._fan.is_on = False
         try:
