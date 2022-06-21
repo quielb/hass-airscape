@@ -3,9 +3,9 @@
     "name": "Airscape Whole House Fan",
     "documentation": "https://www.home-assistant.io/components/fan.airscape",
     "issue_tracker": "https://github.com/quielb/hass-airscape/issues",
-    "version": "0.1.9.5",
+    "version": "0.1.9.5.1",
     "requirements": [
-        "airscape==0.1.9.4"
+        "airscape==0.1.9.4.1"
     ],
     "dependencies": [],
     "codeowners": [

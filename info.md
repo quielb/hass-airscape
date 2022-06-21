@@ -18,7 +18,11 @@ A Home Assistant custom component to control Airscape Whole House Fans with Gen2
 
 ### Changes
 
-{% if version_installed.replace("v", "").replace(".","") | int < 195  %}
+{% if version_installed.replace("v", "").replace(".","") | int < 1951  %}
+
+- Bump pypi airscape to v0.1.9.4.1 for speed of 4.4eWHF fan
+  {% endif %}
+  {% if version_installed.replace("v", "").replace(".","") | int < 195  %}
 
 - Bump pypi airscape to v0.1.9.4 to support fans that don't have a status.cgi.
   {% endif %}
