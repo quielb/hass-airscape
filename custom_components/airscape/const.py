@@ -10,4 +10,5 @@ fan_to_hass_attr = {
     "interlock1": "interlock1",
     "interlock2": "interlock2",
     "timeremaining": "shutoff_timer",
+    "macaddr": "macaddr",
 }
