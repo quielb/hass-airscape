@@ -17,6 +17,11 @@ A Home Assistant custom component to control Airscape Whole House Fans with Gen2
   {% endif %}
 
 ### Changes
+{% if version_installed.replace("v", "").replace(".","") | int < 1955  %}
+
+- Adding unique ids to all fan entities which will allow them to be configured via the UI.
+  {% endif %}
+
 
 {% if version_installed.replace("v", "").replace(".","") | int < 1951  %}
 
