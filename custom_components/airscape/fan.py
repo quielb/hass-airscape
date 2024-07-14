@@ -101,6 +101,11 @@ class AirscapeWHF(FanEntity):
         self._attr = {}
 
     @property
+    def unique_id(self):
+        """Return a unique id based on the MAC address."""
+        return self._attr['macaddr']
+
+    @property
     def name(self):
         """Return the display name of this fan."""
         return self._name
