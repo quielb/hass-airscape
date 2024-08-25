@@ -1,14 +1,19 @@
 {
     "domain": "airscape",
-    "name": "Airscape Whole House Fan",
-    "documentation": "https://www.home-assistant.io/components/fan.airscape",
+    "name": "Airscape",
+    "codeowners": [
+        "@quielb"
+    ],
+    "config_flow": true,
+    "dependencies": [],
+    "documentation": "https://github.com/quielb/hass-airscape/",
     "issue_tracker": "https://github.com/quielb/hass-airscape/issues",
-    "version": "0.1.9.5.5",
+    "homekit": {},
+    "iot_class": "local_polling",
     "requirements": [
         "airscape==0.1.9.4.1"
     ],
-    "dependencies": [],
-    "codeowners": [
-        "@quielb"
-    ]
+    "ssdp": [],
+    "zeroconf": [],
+    "version": "1.0.0"
 }

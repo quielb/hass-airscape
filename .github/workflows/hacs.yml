@@ -1,15 +1,15 @@
-name: HACS Action
+name: HACS Validate
 
 on:
   pull_request:
 
 jobs:
   hacs:
-    name: HACS Action
+    name: HACS Validate
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v2"
-      - name: HACS Action
+      - uses: "actions/checkout@v3"
+      - name: HACS Validate
         uses: "hacs/action@main"
         with:
           ignore: "brands"

@@ -1,0 +1,30 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "data": {
+                    "host": "Host"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Cannont connect to Fan",
+            "unknown": "An unknown error has occured"
+        },
+        "abort": {
+            "already_configured": "Host is alreay configured"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "minimum_speed": "Minimum Speed"
+                },
+                "data_description": {
+                    "minimum_speed": "Lowest speed allowed for custom services"
+                }
+            }
+        }
+    }
+}

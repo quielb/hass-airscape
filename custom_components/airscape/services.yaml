@@ -1,24 +1,21 @@
 speed_up:
   name: Speed Up
   description: Bump the WHF speed up by 1.
-  fields:
-    entity_id:
-      name: Entity ID
-      description: Entity ID of the fan to change.
-      required: true
+  target:
+    entity:
+      integration: airscape
+      domain: fan
 slow_down:
   name: Slow Down
   description: Bump the WHF speed down by 1.
-  fields:
-    entity_id:
-      name: Entity ID
-      description: Entity ID of the fan to change.
-      required: true
-add_time:
-  name: Add Time
-  description: Add an hour to the automatic shutoff timer of the WHF.
-  fields:
-    entity_id:
-      name: Entity ID
-      description: Entity ID of the fan to change.
-      required: true
+  target:
+    entity:
+      integration: airscape
+      domain: fan
+turn_on_to_minimum:
+  name: Turn Fan on to Minimum Speed
+  description: Will turn on the fan and set to optional minimum speed defined during config flow setup
+  target:
+    entity:
+      integration: airscape
+      domain: fan
