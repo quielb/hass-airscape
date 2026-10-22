@@ -54,3 +54,11 @@ Door | Binary sensor to indicate if fan doors are in motion (disabled by default
 [releases]: https://github.com/quielb/hass-airscape/releases
 [release-shield]: https://img.shields.io/github/v/release/quielb/hass-airscape
 [issues]: https://img.shields.io/github/issues/quielb/hass-airscape
+
+## Poll interval
+
+The integration polls the fan every 60 seconds by default. The fan serves one
+request at a time over a connection it closes after each response, and a slow
+response can take seconds; polling faster overlaps requests and the entity
+flaps between available and unavailable. Change it under the integration's
+**Configure** if you need to — 30 seconds is the minimum.

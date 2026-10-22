@@ -14,7 +14,7 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.device_registry import DeviceInfo, format_mac
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, DOMAIN
 from .coordinator import AirscapeCoordinator
 
 PLATFORMS: list[Platform] = [
@@ -41,7 +41,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: AirscapeConfigEntry) -> 
         device = await hass.async_add_executor_job(whf.Fan, entry.data[CONF_HOST])
     except (whf.exceptions.ConnectionError, whf.exceptions.Timeout) as err:
         raise ConfigEntryNotReady from err
-    dataCoordinator = AirscapeCoordinator(hass, device)
+    scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+    dataCoordinator = AirscapeCoordinator(hass, device, scan_interval)
     await dataCoordinator.async_config_entry_first_refresh()
     entry.runtime_data = dataCoordinator
 
