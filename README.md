@@ -57,8 +57,10 @@ Door | Binary sensor to indicate if fan doors are in motion (disabled by default
 
 ## Poll interval
 
-The integration polls the fan every 60 seconds by default. The fan serves one
+The integration polls the fan every 5 seconds by default. The fan serves one
 request at a time over a connection it closes after each response, and a slow
-response can take seconds; polling faster overlaps requests and the entity
-flaps between available and unavailable. Change it under the integration's
-**Configure** if you need to — 30 seconds is the minimum.
+response can take seconds; on a unit that answers slowly, polling that fast
+overlaps the requests and the entity flaps between available and unavailable.
+Change it under the integration's **Configure** if your fan needs a longer
+interval — 5 seconds is the minimum, and 60 seconds is a safe choice for one
+that drops requests.
