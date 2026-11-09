@@ -19,10 +19,19 @@ DOMAIN = "airscape"
 
 # Default Values
 DEFAULT_MINIMUM_SPEED = 1
+DEFAULT_SCAN_INTERVAL = 5
 DEFAULT_TIMEOUT = 5
+
+# The fan serves one request at a time over a connection it closes after each
+# response, and a slow one can take seconds. Polling faster than this overlaps
+# requests: the fan drops connections and the entity flaps between available
+# and unavailable.
+MIN_SCAN_INTERVAL = 5
+MAX_SCAN_INTERVAL = 3600
 
 # Configuration Constants
 CONF_MINIMUM_SPEED = "minimum_speed"
+CONF_SCAN_INTERVAL = "scan_interval"
 
 
 # Services

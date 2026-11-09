@@ -14,13 +14,21 @@ from homeassistant.config_entries import (
     ConfigFlowResult,
     OptionsFlow,
 )
-from homeassistant.const import CONF_HOST
+from homeassistant.const import CONF_HOST, UnitOfTime
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
 from homeassistant.helpers.device_registry import format_mac
 
-from .const import CONF_MINIMUM_SPEED, DEFAULT_MINIMUM_SPEED, DOMAIN
+from .const import (
+    CONF_MINIMUM_SPEED,
+    CONF_SCAN_INTERVAL,
+    DEFAULT_MINIMUM_SPEED,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    MAX_SCAN_INTERVAL,
+    MIN_SCAN_INTERVAL,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -111,7 +119,20 @@ class OptionsFlowHandler(OptionsFlow):
                         selector.NumberSelectorConfig(
                             min=1, max=10, mode=selector.NumberSelectorMode.BOX
                         )
-                    )
+                    ),
+                    vol.Optional(
+                        CONF_SCAN_INTERVAL,
+                        default=self.config_entry.options.get(
+                            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=MIN_SCAN_INTERVAL,
+                            max=MAX_SCAN_INTERVAL,
+                            unit_of_measurement=UnitOfTime.SECONDS,
+                            mode=selector.NumberSelectorMode.BOX,
+                        )
+                    ),
                 }
             ),
         )

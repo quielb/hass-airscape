@@ -10,6 +10,8 @@ import airscape as whf
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
+from .const import DEFAULT_SCAN_INTERVAL
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -18,7 +20,9 @@ class AirscapeCoordinator(DataUpdateCoordinator):
 
     fan_api = None
 
-    def __init__(self, hass: HomeAssistant, fan_api) -> None:
+    def __init__(
+        self, hass: HomeAssistant, fan_api, scan_interval: int = DEFAULT_SCAN_INTERVAL
+    ) -> None:
         """Initialize my coordinator."""
         super().__init__(
             hass,
@@ -26,7 +30,7 @@ class AirscapeCoordinator(DataUpdateCoordinator):
             # Name of the data. For logging purposes.
             name="Airscpae API",
             # Polling interval. Will only be polled if there are subscribers.
-            update_interval=timedelta(seconds=5),
+            update_interval=timedelta(seconds=scan_interval),
             # Set always_update to `False` if the data returned from the
             # api can be compared via `__eq__` to avoid duplicate updates
             # being dispatched to listeners

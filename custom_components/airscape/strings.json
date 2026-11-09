@@ -19,10 +19,12 @@
         "step": {
             "init": {
                 "data": {
-                    "minimum_speed": "Minimum Speed"
+                    "minimum_speed": "Minimum Speed",
+                    "scan_interval": "Poll interval (seconds)"
                 },
                 "data_description": {
-                    "minimum_speed": "Lowest speed allowed for custom services"
+                    "minimum_speed": "Lowest speed allowed for custom services",
+                    "scan_interval": "How often the fan is polled. The fan serves one request at a time and closes the connection after each, so intervals below 30 seconds can overlap requests and make the entities flap between available and unavailable"
                 }
             }
         }
