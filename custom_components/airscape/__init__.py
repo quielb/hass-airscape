@@ -40,7 +40,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: AirscapeConfigEntry) -> 
     try:
         device = await hass.async_add_executor_job(whf.Fan, entry.data[CONF_HOST])
     except (whf.exceptions.ConnectionError, whf.exceptions.Timeout) as err:
-        raise ConfigEntryNotReady from err
+        raise ConfigEntryNotReady(
+            f"Unable to connect to Airscape at {entry.data[CONF_HOST]} "
+            f"({type(err).__name__})"
+        ) from err
     scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
     dataCoordinator = AirscapeCoordinator(hass, device, scan_interval)
     await dataCoordinator.async_config_entry_first_refresh()
