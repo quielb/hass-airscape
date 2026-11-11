@@ -5,6 +5,7 @@
         "@quielb"
     ],
     "config_flow": true,
+    "categories": [ "climate.fans_ventilation" ],
     "dependencies": [],
     "documentation": "https://github.com/quielb/hass-airscape/",
     "issue_tracker": "https://github.com/quielb/hass-airscape/issues",
